@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Assignement",
+    "name": "blinkMoney_assignment",
     "slug": "Assignement",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,6 +12,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.rohangajare.assignement",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -33,16 +34,31 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#0A0F0A",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#0A0F0A"
           }
         }
-      ]
+      ],
+      "expo-font",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "35e42811-d337-42db-b89e-ea91867a2a7d"
+      }
+    },
+    "owner": "rohan_gajare",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/35e42811-d337-42db-b89e-ea91867a2a7d"
     }
   }
 }

@@ -1,98 +1,98 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Screen } from '@/src/components/ui/Screen';
+import { Card } from '@/src/components/ui/Card';
+import { Button } from '@/src/components/ui/Button';
+import { EmptyState } from '@/src/components/ui/EmptyState';
+import { VaultCard } from '@/src/components/vault/VaultCard';
+import { useVaultStore } from '@/src/store/useVaultStore';
+import { spacing, typography } from '@/src/theme/tokens';
+import { useThemeColors } from '@/src/theme/useThemeColors';
+import { formatINR } from '@/src/lib/currency';
+import { formatRelativeTime } from '@/src/lib/dates';
+import { MOCK_PORTFOLIO, portfolioGain } from '@/src/lib/mockPortfolio';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const router = useRouter();
+  const vaultsRecord = useVaultStore((s) => s.vaults);
+  const membersRecord = useVaultStore((s) => s.members);
+  const contributionsRecord = useVaultStore((s) => s.contributions);
+  const getVaultProgress = useVaultStore((s) => s.getVaultProgress);
+  const getMembersForVault = useVaultStore((s) => s.getMembersForVault);
+  const colors = useThemeColors();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  const vaults = Object.values(vaultsRecord).sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+  const recentActivity = Object.values(contributionsRecord)
+    .filter((c) => c.source === 'simulated')
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+
+  const { gain, gainPercent } = portfolioGain();
+
+  const styles = StyleSheet.create({
+    content: { padding: spacing.xl, paddingBottom: spacing['5xl'], gap: spacing.lg },
+    greeting: { color: colors.text.primary },
+    portfolioCard: { gap: 4 },
+    portfolioLabel: { color: colors.text.inverseMuted },
+    portfolioValue: { color: colors.text.inverse },
+    portfolioGain: { color: colors.brand.lime },
+    sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.sm },
+    sectionHeading: { color: colors.text.primary },
+    vaultList: { gap: spacing.md },
+  });
+
+  return (
+    <Screen>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <Text style={[typography.h2, styles.greeting]}>Good to see you 👋</Text>
+
+        <Card tone="dark" style={styles.portfolioCard}>
+          <Text style={[typography.caption, styles.portfolioLabel]}>Your BlinkMoney</Text>
+          <Text style={[typography.display, styles.portfolioValue]}>{formatINR(MOCK_PORTFOLIO.current)}</Text>
+          <Text style={[typography.bodyMedium, styles.portfolioGain]}>
+            +{formatINR(gain)} ({gainPercent.toFixed(1)}%) · Grow ✦ Borrow ✦ Still Grow
+          </Text>
+        </Card>
+
+        {recentActivity && (
+          <Card variant="outlined">
+            <Text style={[typography.body, { color: colors.text.secondary }]}>
+              {membersRecord[recentActivity.memberId]?.name ?? 'A friend'} added{' '}
+              {formatINR(recentActivity.amount)} to {vaultsRecord[recentActivity.vaultId]?.name ?? 'a vault'} ·{' '}
+              {formatRelativeTime(recentActivity.createdAt, Date.now())}
+            </Text>
+          </Card>
+        )}
+
+        <View style={styles.sectionHeader}>
+          <Text style={[typography.h3, styles.sectionHeading]}>Your Squad Vaults</Text>
+          <Button label="+ New" variant="ghost" size="sm" onPress={() => router.push('/vault/create')} />
+        </View>
+
+        {vaults.length === 0 ? (
+          <EmptyState
+            icon="🏝️"
+            title="Start a Squad Vault"
+            subtitle="Save toward something with friends — everyone chips in, and it keeps growing even between contributions."
+            ctaLabel="Create your first Vault"
+            onCtaPress={() => router.push('/vault/create')}
+          />
+        ) : (
+          <View style={styles.vaultList}>
+            {vaults.map((vault) => (
+              <VaultCard
+                key={vault.id}
+                vault={vault}
+                progress={getVaultProgress(vault.id)}
+                members={getMembersForVault(vault.id)}
+                onPress={() => router.push({ pathname: '/vault/[id]', params: { id: vault.id } })}
+              />
+            ))}
+          </View>
+        )}
+      </ScrollView>
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
