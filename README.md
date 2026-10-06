@@ -48,3 +48,8 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Architecture
+[![Architecture diagram](https://gitdiagram.com/diagram-badge.svg)](https://gitdiagram.com/rohan28107/blinkmoney_assignment-?utm_source=readme&utm_medium=badge)
+
+<img width="12703" height="9609" alt="diagram (3)" src="https://github.com/user-attachments/assets/b98e53bd-ebe2-4812-8429-1253a6ae17a2" />
